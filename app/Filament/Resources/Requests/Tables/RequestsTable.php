@@ -18,6 +18,14 @@ class RequestsTable
             ->columns([
                 TextColumn::make('id')->label('Request No')->sortable()->searchable(),
                 TextColumn::make('full_name')->label('Employee')->sortable()->searchable(),
+                TextColumn::make('department.name')->label('Department')->sortable()->searchable(),
+                TextColumn::make('total_expenses')
+                    ->label('Total Cost')
+                    ->getStateUsing(function ($record) {
+                        $expenses = $record->expenses ?? [];
+                        return number_format(collect($expenses)->sum('amount'), 2);
+                    })
+                    ->sortable(),
             ])
             ->filters([
                 //
