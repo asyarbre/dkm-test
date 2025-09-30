@@ -6,10 +6,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
 use Filament\Schemas\Schema;
 use App\Models\Department;
-use Filament\Schemas\Components\Utilities\Get as UtilitiesGet;
+use App\Helpers\NumberToWords;
 
 class RequestForm
 {
@@ -52,14 +51,37 @@ class RequestForm
                             ->label('Amount')
                             ->required()
                             ->numeric()
-                            ->step(0.01),
+                            ->step(0.01)
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                $expenses = $get('../../expenses') ?? [];
+                                $total = collect($expenses)->sum('amount');
+                                $set('../../total_amount_display', 'Rp ' . number_format($total, 0, ',', '.'));
+                                $set('../../total_words_display', ucfirst(NumberToWords::convert($total)));
+                            }),
                     ])
                     ->columns(3)
                     ->defaultItems(1)
                     ->addActionLabel('Add Expense')
                     ->reorderableWithButtons()
                     ->collapsible()
-                    ->live(),
+                    ->live()
+                    ->afterStateUpdated(function ($state, $set, $get) {
+                        $expenses = $get('expenses') ?? [];
+                        $total = collect($expenses)->sum('amount');
+                        $set('total_amount_display', 'Rp ' . number_format($total, 0, ',', '.'));
+                        $set('total_words_display', ucfirst(NumberToWords::convert($total)));
+                    }),
+                TextInput::make('total_amount_display')
+                    ->label('Total Amount')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->default('Rp 0'),
+                TextInput::make('total_words_display')
+                    ->label('Total in Words')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->default('Nol rupiah'),
             ]);
     }
 }

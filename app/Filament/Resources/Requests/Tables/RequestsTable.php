@@ -23,7 +23,7 @@ class RequestsTable
                     ->label('Total Cost')
                     ->getStateUsing(function ($record) {
                         $expenses = $record->expenses ?? [];
-                        return number_format(collect($expenses)->sum('amount'), 2);
+                        return number_format(collect($expenses)->sum('amount'));
                     })
                     ->sortable(),
             ])
